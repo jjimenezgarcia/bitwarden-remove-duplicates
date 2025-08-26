@@ -1,5 +1,9 @@
 # BITWARDEN DUPLICATE REMOVAL
 
+Remove duplicates from your Bitwarden vault without exporting your passwords to any file, avoiding loss or theft, and using only the official Bitwarden CLI.
+
+This script does not store any data, nor does it share it with any third party, you can verify this by inspecting the code.
+
 ## Install Bitwarden official CLI tool
 ### Ubuntu
 
@@ -36,7 +40,7 @@ $ export BW_SESSION="<session_key>"
 $ bw sync
 ```
 
-## Migrate
+## Remove duplicates
 
 ```bash
 $ chmod +x ./bitwarden-remove-duplicates
@@ -52,3 +56,9 @@ continue
 [i] Deleting item with ID: 4ab1f3b2-4901-xxxx-xxxx-xxxxxxxxxxx
 [i] Deleting item with ID: 799d01fd-ce69-xxxx-xxxx-xxxxxxxxxxx
 ```
+
+## Custom deletion
+
+The script works linking `name`, `username` and `password`.
+
+If you want the script to consider other parameters in order to be considered a "duplicate", feel free to edit that on lines [20-22] of the script.
