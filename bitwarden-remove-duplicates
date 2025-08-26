@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ANSI color codes
-RED='\033[0;31m'
+RED='\033[38;5;203m'
 WHITE='\033[0;37m'
 NC='\033[0m' # No Color
 
@@ -24,7 +24,7 @@ jq 'sort_by(.name, .login.username, .login.password)
 # Check if there are duplicates
 DUP_COUNT=$(echo "$ITEMS" | jq 'length')
 if [ "$DUP_COUNT" -eq 0 ]; then
-    echo "No duplicate items found."
+    echo -e "${RED}No duplicate items found.${NC}"
     exit 0
 fi
 
