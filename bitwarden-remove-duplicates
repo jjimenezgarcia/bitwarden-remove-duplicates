@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# ANSI color codes
+RED='\033[0;31m'
+WHITE='\033[0;37m'
+NC='\033[0m' # No Color
+
+# Ensure the user is logged in
+echo "Checking Bitwarden session..."
+SESSION_CHECK=$(bw status | jq -r '.status')
+
+if [ "$SESSION_CHECK" != "unlocked" ]; then
+    echo "You are not logged in or your vault is locked."
+    echo "Please unlock your vault (bw unlock) or login (bw login) first."
+    exit 1
+fi
+
+# Get duplicated items with their info
+ITEMS=$(bw list items | \
+jq 'sort_by(.name, .login.username, .login.password)
+    | group_by(.name + .login.username + .login.password)
+    | map(select(length > 1) | first)')
+
+# Check if there are duplicates
+DUP_COUNT=$(echo "$ITEMS" | jq 'length')
+if [ "$DUP_COUNT" -eq 0 ]; then
+    echo "No duplicate items found."
+    exit 0
+fi
+
+# Loop through each item
+echo -e "${RED}To delete:${NC}"
+echo "$ITEMS" | jq -r '.[] | "\(.name) | \(.login.username) | \(.login.password[0:3])********"' | while read -r line; do
+    echo -e "${WHITE}$line${NC}"
+done
+
+# Ask for confirmation
+echo -e "${RED}Type 'continue' to proceed with deletion:${NC}"
+read -r CONFIRM
+
+if [ "$CONFIRM" != "continue" ]; then
+    echo "Aborted."
+    exit 0
+fi
+
+# Delete items
+echo "$ITEMS" | jq -r '.[] | .id' | while read -r id; do
+    echo "[i] Deleting item with ID: $id"
+    bw delete item "$id"
+done
