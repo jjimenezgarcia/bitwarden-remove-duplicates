@@ -15,7 +15,11 @@ snap install bw
 
 Go to [official repo cli](https://github.com/bitwarden/cli/releases)
 
-Decompress `tar -xvzf bw-linux-<ARCH>.tar.gz`
+Download `bw-linux-1.22.1.zip`
+
+```bash
+unzip bw-linux-1.22.1.zip
+```
 
 If you want to use it from now on, move it to somewhere on your PATH
 ```bash
