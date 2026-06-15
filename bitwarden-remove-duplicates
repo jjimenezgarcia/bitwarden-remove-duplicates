@@ -19,7 +19,8 @@ fi
 ITEMS=$(bw list items | \
 jq 'sort_by(.name, .login.username, .login.password)
     | group_by(.name + .login.username + .login.password)
-    | map(select(length > 1) | first)')
+    | map(select(length > 1) | .[1:])
+    | add // []')
 
 # Check if there are duplicates
 DUP_COUNT=$(echo "$ITEMS" | jq 'length')
