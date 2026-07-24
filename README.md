@@ -5,6 +5,18 @@ Remove duplicates from your Bitwarden vault without exporting your passwords to 
 This script does not store any data, nor does it share it with any third party, you can verify this by inspecting the code.
 
 ## Install Bitwarden official CLI tool
+### macOS
+
+```bash
+brew install bitwarden-cli
+```
+
+or, via npm:
+
+```bash
+npm install -g @bitwarden/cli
+```
+
 ### Ubuntu
 
 ```bash
@@ -65,4 +77,4 @@ continue
 
 The script works linking `name`, `username` and `password`.
 
-If you want the script to consider other parameters in order to be considered a "duplicate", feel free to edit that on lines [20-22] of the script.
+If you want the script to consider other parameters in order to be considered a "duplicate", feel free to edit that on lines [20-23] of the script.
