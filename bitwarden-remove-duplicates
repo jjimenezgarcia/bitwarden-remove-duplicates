@@ -5,6 +5,14 @@ RED='\033[38;5;203m'
 WHITE='\033[0;37m'
 NC='\033[0m' # No Color
 
+VERBOSE=0
+while getopts "v" opt; do
+    case "$opt" in
+        v) VERBOSE=1 ;;
+        *) echo "Usage: $0 [-v]"; exit 1 ;;
+    esac
+done
+
 # Ensure the user is logged in
 echo "Checking Bitwarden session..."
 SESSION_CHECK=$(bw status | jq -r '.status')
@@ -12,23 +20,21 @@ SESSION_CHECK=$(bw status | jq -r '.status')
 if [ "$SESSION_CHECK" != "unlocked" ]; then
     echo "You are not logged in or your vault is locked."
     echo "Please unlock your vault (bw unlock) or login (bw login) first."
+    echo "Then export your BW_SESSION as provided by the unlock command (ex: $ export BW_SESSION='<session_key>')"
     exit 1
 fi
 
 # Get duplicated items with their info
 ITEMS=$(bw list items | \
-jq 'sort_by(.name, .login.username, .login.password)
-    | group_by(.name + .login.username + .login.password)
-    | map(select(length > 1) | .[1:])
 jq '
-  map(select(.type == 1))
-  | group_by([.name, .login.username, .login.password])
-  | map(
-      select(length > 1)
-      | sort_by(.revisionDate // "")
-      | .[:-1]
-    )
-  | add // []
+    map(select(.type == 1))
+    | group_by([.name, .login.username, .login.password])
+    | map(
+        select(length > 1)
+        | sort_by(.revisionDate // "")
+        | .[:-1]
+      )
+    | add // []
 ')
 
 # Check if there are duplicates
@@ -38,11 +44,14 @@ if [ "$DUP_COUNT" -eq 0 ]; then
     exit 0
 fi
 
-# Loop through each item
-echo -e "${RED}To delete:${NC}"
-echo "$ITEMS" | jq -r '.[] | "\(.name) | \(.login.username) | \(.login.password[0:3])********"' | while read -r line; do
-    echo -e "${WHITE}$line${NC}"
-done
+echo "Found $DUP_COUNT duplicate item(s) (keeping newest by revision date, deleting the rest)."
+
+if [ "$VERBOSE" -eq 1 ]; then
+    echo -e "${RED}To delete:${NC}"
+    echo "$ITEMS" | jq -r '.[] | "\(.name) | \(.login.username)"' | while read -r line; do
+        echo -e "${WHITE}$line${NC}"
+    done
+fi
 
 # Ask for confirmation
 echo -e "${RED}Type 'continue' to proceed with deletion:${NC}"
@@ -58,3 +67,4 @@ echo "$ITEMS" | jq -r '.[] | .id' | while read -r id; do
     echo "[i] Deleting item with ID: $id"
     bw delete item "$id"
 done
+
